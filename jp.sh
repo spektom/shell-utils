@@ -16,7 +16,8 @@ if [ -z "$pool_id" ] || [ -z "$pool_size" ] || [ $# -eq 0 ]; then
 	exit 1
 fi
 
-workdir="/tmp/.jp"
+pool_id=$(echo $pool_id | sed 's/\W/_/g')
+workdir="/tmp/$(whoami)-jp"
 [ -d $workdir ] || mkdir -p $workdir || exit $?
 lock_prefix="$workdir/$pool_id"
 lock_file="$lock_prefix.$$"

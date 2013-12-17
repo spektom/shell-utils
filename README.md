@@ -10,7 +10,17 @@ and run some commands through it. That means that if a pool size is N,
 at most N commands will be run simultaneously, others will wait until
 a slot will be freed.
 
-#### USAGE ####
+For example, to run at most 3 processes of cURL when downloading a lot of files,
+wrap your cURL commands as follows:
+
+```
+./jp.sh "My Download Pool" 3 curl http://site1/...
+./jp.sh "My Download Pool" 3 curl http://site2/...
+./jp.sh "My Download Pool" 3 curl http://site3/...
+...
+```
+
+##### Executing #####
 
 ```
 USAGE: ./jp.sh <ID> <limit> <command>
