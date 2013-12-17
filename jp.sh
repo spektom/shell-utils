@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Job pool implementation in BASH
+# License: Apache 2.0
+# Author: Michael Spector <spektom@gmail.com>
+#
 
 pool_id=$1
 shift
