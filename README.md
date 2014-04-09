@@ -31,3 +31,8 @@ Where:
   <command>  Command to run
 ```
 
+### sysinfo.sh - System information collector ###
+
+System information gathering utility, which you may have to run
+when reporting on an issue from a running system.
+
