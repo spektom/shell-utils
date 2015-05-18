@@ -5,13 +5,9 @@
 # Author: Michael Spector <spektom@gmail.com>
 #
 
-pool_id=$1
-shift
-pool_size=$1
-shift
-if [ -z "$pool_id" ] || [ -z "$pool_size" ] || [ $# -eq 0 ]; then
+help() {
 	echo
-	echo "USAGE: $0 <ID> <limit> <command>"
+	echo "USAGE: $0 {add|wait} <ID> <limit> <command...>"
 	echo
 	echo "Where:"
 	echo "  <ID>       Job pool identifier"
@@ -19,6 +15,23 @@ if [ -z "$pool_id" ] || [ -z "$pool_size" ] || [ $# -eq 0 ]; then
 	echo "  <command>  Command to run"
 	echo
 	exit 1
+}
+
+pool_cmd=$1
+shift
+pool_id=$1
+shift
+
+if [ "$pool_cmd" = "add" ]; then
+	pool_size=$1
+	shift
+	if [ -z "$pool_id" ] || [ -z "$pool_size" ] || [ $# -eq 0 ]; then
+		help
+	fi
+elif [ "$pool_cmd" = "wait" ]; then
+	[ ! -z "$pool_id" ] || help
+else
+	help
 fi
 
 pool_id=$(echo $pool_id | sed 's/\W/_/g')
@@ -42,11 +55,17 @@ lock() {
 				rm -f $l
 			fi
 		done
-		if [ $num_running -lt $pool_size ]; then
-			touch $lock_file
-			return 0
+
+		if [ "$pool_cmd" = "wait" ]; then
+			[ $num_running -eq 0 ]
+			return $?
+		elif [ "$pool_cmd" = "add" ]; then
+			if [ $num_running -lt $pool_size ]; then
+				touch $lock_file
+				return 0
+			fi
+			return 1
 		fi
-		return 1
 
 	) 201>$workdir/.lock
 }
@@ -58,10 +77,12 @@ unlock() {
 trap "unlock; exit 0" INT TERM EXIT
 
 while ! lock; do
-	# Waiting for some process to exit
+	# Waiting for processes to exit
 	sleep 1
 done
 
-# Run the command
-"$@"
+if [ "$pool_cmd" = "add" ]; then
+	# Run the command
+	"$@"
+fi
 
